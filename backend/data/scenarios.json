@@ -1,0 +1,29 @@
+{
+  "description": "Pre-built scenarios for demo. Use 'Fill Sample Data' with these profiles.",
+  "scenarios": [
+    {
+      "name": "Nguyen Van An",
+      "id_number": "079123456789",
+      "scenario": "normal_hnwi",
+      "description": "Khach hang HNWI binh thuong, CASA cao, khau vi can bang"
+    },
+    {
+      "name": "Pham Minh Tuan",
+      "id_number": "079201456789",
+      "scenario": "bad_debt",
+      "description": "Khach hang no xau nhom 5, he thong se canh bao nhung van cho tiep tuc voi Enhanced Due Diligence"
+    },
+    {
+      "name": "Tran Van Gian Lan",
+      "id_number": "001099000111",
+      "scenario": "blacklisted",
+      "description": "Khach hang nam trong danh sach den AML - DAG se HALT ngay lap tuc"
+    },
+    {
+      "name": "Le Thi Mai",
+      "id_number": "052088123456",
+      "scenario": "conservative_retiree",
+      "description": "Nguoi ve huu, khau vi than trong, uu tien bao toan von va dong tien co dinh"
+    }
+  ]
+}

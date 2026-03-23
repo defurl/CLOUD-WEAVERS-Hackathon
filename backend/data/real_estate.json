@@ -1,0 +1,90 @@
+{
+  "districts": {
+    "1": {
+      "name": "Quan 1",
+      "city": "TP.HCM",
+      "avg_price_per_sqm": 350000000,
+      "trend": "stable",
+      "trend_pct": 2.1,
+      "properties": [
+        {"type": "Nha pho mat tien", "multiplier": 1.0},
+        {"type": "Nha pho hem 6m+", "multiplier": 0.75},
+        {"type": "Nha pho hem 3-6m", "multiplier": 0.55},
+        {"type": "Nha pho hem duoi 3m", "multiplier": 0.40},
+        {"type": "Can ho chung cu", "multiplier": 0.45}
+      ]
+    },
+    "2": {
+      "name": "Quan 2 (TP. Thu Duc)",
+      "city": "TP.HCM",
+      "avg_price_per_sqm": 130000000,
+      "trend": "up",
+      "trend_pct": 8.5,
+      "properties": [
+        {"type": "Nha pho mat tien", "multiplier": 1.0},
+        {"type": "Nha pho hem 6m+", "multiplier": 0.70},
+        {"type": "Nha pho hem 3-6m", "multiplier": 0.50},
+        {"type": "Can ho chung cu", "multiplier": 0.55}
+      ]
+    },
+    "3": {
+      "name": "Quan 3",
+      "city": "TP.HCM",
+      "avg_price_per_sqm": 260000000,
+      "trend": "stable",
+      "trend_pct": 1.8,
+      "properties": [
+        {"type": "Nha pho mat tien", "multiplier": 1.0},
+        {"type": "Nha pho hem 6m+", "multiplier": 0.72},
+        {"type": "Nha pho hem 3-6m", "multiplier": 0.52}
+      ]
+    },
+    "7": {
+      "name": "Quan 7",
+      "city": "TP.HCM",
+      "avg_price_per_sqm": 140000000,
+      "trend": "up",
+      "trend_pct": 6.2,
+      "properties": [
+        {"type": "Nha pho mat tien", "multiplier": 1.0},
+        {"type": "Nha pho hem 6m+", "multiplier": 0.68},
+        {"type": "Can ho chung cu", "multiplier": 0.50}
+      ]
+    },
+    "Binh Thanh": {
+      "name": "Quan Binh Thanh",
+      "city": "TP.HCM",
+      "avg_price_per_sqm": 120000000,
+      "trend": "up",
+      "trend_pct": 5.4,
+      "properties": [
+        {"type": "Nha pho mat tien", "multiplier": 1.0},
+        {"type": "Nha pho hem 6m+", "multiplier": 0.65},
+        {"type": "Nha pho hem 3-6m", "multiplier": 0.48},
+        {"type": "Can ho chung cu", "multiplier": 0.42}
+      ]
+    },
+    "Thu Duc": {
+      "name": "TP. Thu Duc",
+      "city": "TP.HCM",
+      "avg_price_per_sqm": 85000000,
+      "trend": "up",
+      "trend_pct": 12.3,
+      "properties": [
+        {"type": "Nha pho mat tien", "multiplier": 1.0},
+        {"type": "Nha pho hem 6m+", "multiplier": 0.62},
+        {"type": "Can ho chung cu", "multiplier": 0.48}
+      ]
+    }
+  },
+  "alley_width_factors": {
+    "0-2": {"factor": 0.40, "label": "Hem duoi 2m (rat hep)"},
+    "2-3": {"factor": 0.55, "label": "Hem 2-3m (hep)"},
+    "3-4": {"factor": 0.65, "label": "Hem 3-4m"},
+    "4-6": {"factor": 0.75, "label": "Hem 4-6m"},
+    "6-8": {"factor": 0.85, "label": "Hem 6-8m (rong)"},
+    "8+": {"factor": 0.95, "label": "Hem tren 8m / mat tien"}
+  },
+  "valuation_source": "Citics AVM (simulated)",
+  "last_updated": "2026-03-15"
+}

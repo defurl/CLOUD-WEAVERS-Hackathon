@@ -1,0 +1,32 @@
+{
+  "blacklisted_ids": [
+    "001099000111",
+    "079000000000",
+    "038099888777"
+  ],
+  "blacklisted_names": [
+    "tran van gian lan",
+    "le thi rua tien"
+  ],
+  "bad_debt_clients": {
+    "079201456789": {
+      "name": "Pham Minh Tuan",
+      "group": "5",
+      "reason": "No qua han tren 360 ngay tai VPBank, du no 1.2 ty VND",
+      "reported_date": "2025-08-15"
+    },
+    "038177654321": {
+      "name": "Vo Thanh Hai",
+      "group": "3",
+      "reason": "No qua han 90-180 ngay tai Techcombank, du no 450 trieu VND",
+      "reported_date": "2025-11-20"
+    }
+  },
+  "pep_list": [
+    {
+      "name": "nguyen van chinh tri",
+      "role": "Politically Exposed Person",
+      "note": "Can kiem tra nang cao (Enhanced Due Diligence)"
+    }
+  ]
+}

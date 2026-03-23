@@ -1,0 +1,42 @@
+{
+  "macro": {
+    "gdp_growth_pct": 6.5,
+    "inflation_pct": 3.8,
+    "sbv_interest_rate_pct": 4.5,
+    "vnd_usd_rate": 25450,
+    "vnindex": 1285,
+    "vnindex_pe": 14.2,
+    "credit_growth_pct": 14.1,
+    "last_updated": "2026-03-20"
+  },
+  "bonds": {
+    "conservative": [
+      {"issuer": "Vinhomes", "ticker": "VHM_BOND_2027", "coupon_rate": 9.5, "maturity": "2027-06-15", "credit_score": "A", "min_investment_vnd": 100000000, "sector": "Bat dong san"},
+      {"issuer": "Masan Group", "ticker": "MSN_BOND_2026", "coupon_rate": 8.8, "maturity": "2026-12-01", "credit_score": "A+", "min_investment_vnd": 200000000, "sector": "Hang tieu dung"}
+    ],
+    "moderate": [
+      {"issuer": "Novaland", "ticker": "NVL_BOND_2028", "coupon_rate": 11.0, "maturity": "2028-03-20", "credit_score": "BBB+", "min_investment_vnd": 100000000, "sector": "Bat dong san"},
+      {"issuer": "Hoa Phat", "ticker": "HPG_BOND_2027", "coupon_rate": 10.2, "maturity": "2027-09-01", "credit_score": "A-", "min_investment_vnd": 100000000, "sector": "Thep"}
+    ],
+    "aggressive": [
+      {"issuer": "Trung Nam Group", "ticker": "TNG_BOND_2029", "coupon_rate": 13.5, "maturity": "2029-01-15", "credit_score": "BB", "min_investment_vnd": 500000000, "sector": "Nang luong"},
+      {"issuer": "Sunshine Group", "ticker": "SS_BOND_2028", "coupon_rate": 12.8, "maturity": "2028-06-01", "credit_score": "BB+", "min_investment_vnd": 200000000, "sector": "Bat dong san"}
+    ]
+  },
+  "stocks": {
+    "conservative": [
+      {"ticker": "VCB", "name": "Vietcombank", "sector": "Ngan hang", "price": 92500, "pe_ratio": 14.2, "dividend_yield_pct": 1.5, "market_cap_ty": 462},
+      {"ticker": "FPT", "name": "FPT Corporation", "sector": "Cong nghe", "price": 135000, "pe_ratio": 22.1, "dividend_yield_pct": 2.0, "market_cap_ty": 189}
+    ],
+    "moderate": [
+      {"ticker": "VNM", "name": "Vinamilk", "sector": "Tieu dung", "price": 72000, "pe_ratio": 18.5, "dividend_yield_pct": 4.2, "market_cap_ty": 150},
+      {"ticker": "HPG", "name": "Hoa Phat Group", "sector": "Thep", "price": 26500, "pe_ratio": 10.8, "dividend_yield_pct": 1.8, "market_cap_ty": 119},
+      {"ticker": "MWG", "name": "The Gioi Di Dong", "sector": "Ban le", "price": 58000, "pe_ratio": 15.3, "dividend_yield_pct": 2.5, "market_cap_ty": 83}
+    ],
+    "aggressive": [
+      {"ticker": "VHM", "name": "Vinhomes", "sector": "Bat dong san", "price": 41000, "pe_ratio": 8.5, "dividend_yield_pct": 0.5, "market_cap_ty": 142},
+      {"ticker": "SSI", "name": "SSI Securities", "sector": "Chung khoan", "price": 35000, "pe_ratio": 12.1, "dividend_yield_pct": 3.0, "market_cap_ty": 53},
+      {"ticker": "DGW", "name": "Digiworld", "sector": "Phan phoi CN", "price": 48000, "pe_ratio": 11.2, "dividend_yield_pct": 2.8, "market_cap_ty": 15}
+    ]
+  }
+}

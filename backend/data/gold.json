@@ -1,0 +1,19 @@
+{
+  "sjc": {
+    "buy_price": 92500000,
+    "sell_price": 94500000,
+    "unit": "VND/luong",
+    "last_updated": "2026-03-20T10:30:00"
+  },
+  "sjc_history": [
+    {"date": "2026-03-20", "buy": 92500000, "sell": 94500000},
+    {"date": "2026-03-19", "buy": 92000000, "sell": 94000000},
+    {"date": "2026-03-18", "buy": 91800000, "sell": 93800000},
+    {"date": "2026-03-17", "buy": 92200000, "sell": 94200000},
+    {"date": "2026-03-14", "buy": 91500000, "sell": 93500000}
+  ],
+  "world_gold_usd_oz": 2185.50,
+  "premium_pct": 18.2,
+  "trend": "up",
+  "trend_note": "Gia vang SJC cao hon gia the gioi ~18%, xu huong tang nhe trong tuan"
+}

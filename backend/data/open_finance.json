@@ -1,0 +1,18 @@
+{
+  "mock_accounts": {
+    "079123456789": [
+      {"bank": "Techcombank", "account_type": "Tiet kiem", "balance_vnd": 500000000, "currency": "VND"},
+      {"bank": "VPBank", "account_type": "Thanh toan", "balance_vnd": 120000000, "currency": "VND"},
+      {"bank": "MB Bank", "account_type": "Tiet kiem co ky han", "balance_vnd": 1000000000, "currency": "VND", "maturity_date": "2026-09-15", "interest_rate_pct": 5.5}
+    ],
+    "079201456789": [
+      {"bank": "Sacombank", "account_type": "Thanh toan", "balance_vnd": 15000000, "currency": "VND"}
+    ],
+    "default": [
+      {"bank": "ACB", "account_type": "Tiet kiem", "balance_vnd": 300000000, "currency": "VND"},
+      {"bank": "TPBank", "account_type": "Thanh toan", "balance_vnd": 85000000, "currency": "VND"}
+    ]
+  },
+  "source": "Brankas API (simulated - Circular 64/2024)",
+  "consent_required": true
+}

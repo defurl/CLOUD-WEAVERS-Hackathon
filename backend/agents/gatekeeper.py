@@ -1,0 +1,102 @@
+"""
+Gatekeeper Agent — AML/KYC compliance check.
+Reads from data/aml_blacklist.json for blacklist, bad debt, PEP checks.
+"""
+
+import json
+from pathlib import Path
+
+from models.state import AdvisoryState, ComplianceStatus, ComplianceDetail
+
+_DATA_PATH = Path(__file__).parent.parent / "data" / "aml_blacklist.json"
+
+
+def _load_aml_data() -> dict:
+    with open(_DATA_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def gatekeeper_check(state: AdvisoryState) -> dict:
+    """Node: Run AML/KYC + bad debt + PEP screening."""
+    profile = state.get("client_profile", {})
+    data = _load_aml_data()
+
+    client_name = profile.get("name", "").lower().strip()
+    client_id = profile.get("id_number", "").strip()
+
+    detail: ComplianceDetail = {
+        "aml_check": "passed",
+        "bad_debt_check": "passed",
+        "pep_check": "passed",
+        "bad_debt_info": None,
+    }
+
+    # 1. AML blacklist check
+    if client_id in data.get("blacklisted_ids", []):
+        detail["aml_check"] = "FAILED"
+        return {
+            "compliance_status": ComplianceStatus.FAILED,
+            "compliance_reason": f"HALT: CCCD {client_id} nam trong danh sach den AML. Khong duoc phep tiep tuc.",
+            "compliance_detail": detail,
+        }
+
+    if client_name in [n.lower() for n in data.get("blacklisted_names", [])]:
+        detail["aml_check"] = "FAILED"
+        return {
+            "compliance_status": ComplianceStatus.FAILED,
+            "compliance_reason": f"HALT: Ten khach hang bi danh dau trong he thong AML screening.",
+            "compliance_detail": detail,
+        }
+
+    # 2. Bad debt check (CIC)
+    bad_debt = data.get("bad_debt_clients", {}).get(client_id)
+    if bad_debt:
+        detail["bad_debt_check"] = f"WARNING - Nhom {bad_debt['group']}"
+        detail["bad_debt_info"] = bad_debt
+
+        if int(bad_debt["group"]) >= 5:
+            return {
+                "compliance_status": ComplianceStatus.WARNING,
+                "compliance_reason": (
+                    f"CANH BAO: Khach hang co no xau nhom {bad_debt['group']}. "
+                    f"Ly do: {bad_debt['reason']}. "
+                    f"Can Enhanced Due Diligence. RM can xac nhan de tiep tuc."
+                ),
+                "compliance_detail": detail,
+            }
+        else:
+            return {
+                "compliance_status": ComplianceStatus.WARNING,
+                "compliance_reason": (
+                    f"CANH BAO: Khach hang co lich su no nhom {bad_debt['group']}. "
+                    f"Ly do: {bad_debt['reason']}. RM can luu y."
+                ),
+                "compliance_detail": detail,
+            }
+
+    # 3. PEP check
+    for pep in data.get("pep_list", []):
+        if pep["name"].lower() == client_name:
+            detail["pep_check"] = f"WARNING - {pep['role']}"
+            return {
+                "compliance_status": ComplianceStatus.WARNING,
+                "compliance_reason": (
+                    f"CANH BAO: Khach hang la Politically Exposed Person (PEP). "
+                    f"{pep.get('note', '')}. RM can xac nhan."
+                ),
+                "compliance_detail": detail,
+            }
+
+    # 4. Basic validation
+    if not client_name:
+        return {
+            "compliance_status": ComplianceStatus.FAILED,
+            "compliance_reason": "Thieu ten khach hang - khong the thuc hien kiem tra AML/KYC.",
+            "compliance_detail": detail,
+        }
+
+    return {
+        "compliance_status": ComplianceStatus.PASSED,
+        "compliance_reason": "Khach hang PASSED tat ca kiem tra AML/KYC, CIC, PEP.",
+        "compliance_detail": detail,
+    }
