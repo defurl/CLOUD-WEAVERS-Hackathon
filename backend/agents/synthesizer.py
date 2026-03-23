@@ -76,7 +76,7 @@ def synthesizer_node(state: AdvisoryState) -> dict:
     prompt = _build_synthesis_prompt(redacted, real_estate, market_intel, gold, open_finance, tax_calc)
     llm_report = generate(
         prompt,
-        system="You are a senior financial advisor at one of Vietnam's largest banks. Generate a COMPREHENSIVE and DETAILED personalized investment advisory report. Use markdown with tables, specific figures, and in-depth analysis. The report must cover: net worth overview, real estate valuation, investment recommendations (bonds, stocks, gold), PIT tax implications, macro indicators, and risk factors. Write at least 1500 words. All monetary values in VND.",
+        system="You are a senior financial advisor at one of Vietnam's largest banks. Generate a COMPREHENSIVE and DETAILED personalized investment advisory report. Use markdown with tables, specific figures, and in-depth analysis. The report must cover: net worth overview, real estate valuation, investment recommendations (bonds, stocks, gold), PIT tax implications, macro indicators, and risk factors. Target 900-1200 words. Ensure the response ends cleanly with complete sentences and properly closed markdown structures (parentheses, tables, lists, headings). All monetary values in VND.",
         temperature=0.5,
         max_tokens=8192,
     )

@@ -16,6 +16,32 @@ _client = None
 _MODEL = "gemini-2.5-flash"
 
 
+def _extract_text(response) -> str:
+    """Extract text safely from Gemini response."""
+    text = getattr(response, "text", None)
+    if isinstance(text, str) and text.strip():
+        return text
+
+    # Fallback for cases where response.text is empty but candidates/parts exist.
+    chunks: list[str] = []
+    for candidate in getattr(response, "candidates", []) or []:
+        content = getattr(candidate, "content", None)
+        for part in getattr(content, "parts", []) or []:
+            part_text = getattr(part, "text", None)
+            if isinstance(part_text, str) and part_text:
+                chunks.append(part_text)
+    return "".join(chunks)
+
+
+def _finish_reason(response) -> str:
+    """Return normalized finish reason string for first candidate."""
+    candidates = getattr(response, "candidates", []) or []
+    if not candidates:
+        return ""
+    reason = getattr(candidates[0], "finish_reason", "")
+    return str(reason).upper()
+
+
 def _get_client():
     global _client
     if _client is not None:
@@ -35,6 +61,7 @@ def generate(prompt: str, *, system: str = "", temperature: float = 0.7, max_tok
         return None
     try:
         from google.genai import types
+
         response = client.models.generate_content(
             model=_MODEL,
             contents=prompt,
@@ -44,7 +71,34 @@ def generate(prompt: str, *, system: str = "", temperature: float = 0.7, max_tok
                 max_output_tokens=max_tokens,
             ),
         )
-        return response.text
+        text = _extract_text(response)
+        if not text:
+            return None
+
+        # If the model stopped due to token limits, fetch one continuation chunk.
+        reason = _finish_reason(response)
+        if "MAX_TOKENS" in reason:
+            continuation_prompt = (
+                "Continue the text below from exactly where it stopped. "
+                "Do not repeat earlier content. Keep markdown formatting consistent.\n\n"
+                "---\n"
+                f"{text[-4000:]}\n"
+                "---"
+            )
+            continuation = client.models.generate_content(
+                model=_MODEL,
+                contents=continuation_prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system if system else None,
+                    temperature=temperature,
+                    max_output_tokens=max_tokens,
+                ),
+            )
+            cont_text = _extract_text(continuation)
+            if cont_text:
+                text = f"{text.rstrip()}\n\n{cont_text.lstrip()}"
+
+        return text.strip()
     except Exception as e:
         log.warning("Gemini API call failed: %s", e)
         return None
