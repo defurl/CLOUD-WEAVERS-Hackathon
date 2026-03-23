@@ -76,7 +76,7 @@ def synthesizer_node(state: AdvisoryState) -> dict:
     prompt = _build_synthesis_prompt(redacted, real_estate, market_intel, gold, open_finance, tax_calc)
     llm_report = generate(
         prompt,
-        system="You are a senior financial advisor at one of Vietnam's largest banks. Generate a COMPREHENSIVE and DETAILED personalized investment advisory report. Use markdown with tables, specific figures, and in-depth analysis. The report must cover: net worth overview, real estate valuation, investment recommendations (bonds, stocks, gold), PIT tax implications, macro indicators, and risk factors. Target 900-1200 words. Ensure the response ends cleanly with complete sentences and properly closed markdown structures (parentheses, tables, lists, headings). All monetary values in VND.",
+        system="Bạn là chuyên gia tư vấn tài chính cao cấp tại một ngân hàng lớn ở Việt Nam. Hãy tạo báo cáo tư vấn đầu tư cá nhân hóa, chi tiết, dùng markdown với bảng, số liệu cụ thể và phân tích sâu. Báo cáo phải bao gồm: tổng quan tài sản ròng, định giá bất động sản, khuyến nghị đầu tư (trái phiếu, cổ phiếu, vàng), tác động PIT, bối cảnh vĩ mô và rủi ro. Độ dài mục tiêu 900-1200 từ. Luôn kết thúc trọn ý, câu hoàn chỉnh, đóng đầy đủ ngoặc/bảng/danh sách/tiêu đề markdown. Viết hoàn toàn bằng tiếng Việt có dấu; nếu gặp cụm tiếng Việt không dấu (ví dụ: tiet kiem), hãy tự chuẩn hóa thành tiếng Việt có dấu (tiết kiệm). Tất cả giá trị tiền tệ dùng VND.",
         temperature=0.5,
         max_tokens=8192,
     )

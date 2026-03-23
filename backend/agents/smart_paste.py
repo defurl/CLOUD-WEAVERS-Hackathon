@@ -34,27 +34,27 @@ def _extract_profile(text: str) -> ClientProfile:
     profile: ClientProfile = {}
 
     # Name
-    name_match = re.search(r"(?:Họ tên|Tên|Name|Client)[:\s]+([^\n,]+)", text, re.IGNORECASE)
+    name_match = re.search(r"(?:Họ tên|Ho ten|Tên|Ten|Name|Client)[:\s]+([^\n,]+)", text, re.IGNORECASE)
     if name_match:
         profile["name"] = name_match.group(1).strip()
 
     # Phone
-    phone_match = re.search(r"(?:SĐT|Phone|Điện thoại|Tel)[:\s]+([\d\s\-\.]+)", text, re.IGNORECASE)
+    phone_match = re.search(r"(?:SĐT|SDT|Phone|Điện thoại|Dien thoai|Tel)[:\s]+([\d\s\-\.]+)", text, re.IGNORECASE)
     if phone_match:
         profile["phone"] = phone_match.group(1).strip()
 
     # ID number (CCCD/CMND)
-    id_match = re.search(r"(?:CCCD|CMND|ID|Số CMND)[:\s]+([\d]+)", text, re.IGNORECASE)
+    id_match = re.search(r"(?:CCCD|CMND|ID|Số CMND|So CMND)[:\s]+([\d]+)", text, re.IGNORECASE)
     if id_match:
         profile["id_number"] = id_match.group(1).strip()
 
     # Address
-    addr_match = re.search(r"(?:Địa chỉ|Address)[:\s]+([^\n]+)", text, re.IGNORECASE)
+    addr_match = re.search(r"(?:Địa chỉ|Dia chi|Address)[:\s]+([^\n]+)", text, re.IGNORECASE)
     if addr_match:
         profile["address"] = addr_match.group(1).strip()
 
     # CASA balance
-    balance_match = re.search(r"(?:CASA|Số dư|Balance)[:\s]+([\d\.,]+)", text, re.IGNORECASE)
+    balance_match = re.search(r"(?:CASA|Số dư|So du|Balance)[:\s]+([\d\.,]+)", text, re.IGNORECASE)
     if balance_match:
         balance_str = balance_match.group(1).replace(",", "").replace(".", "")
         try:
@@ -64,17 +64,24 @@ def _extract_profile(text: str) -> ClientProfile:
 
     # Risk profile
     risk_match = re.search(
-        r"(?:Risk|Rủi ro|Khẩu vị)[:\s]+(conservative|moderate|aggressive|thận trọng|cân bằng|mạo hiểm)",
+        r"(?:Risk|Rủi ro|Rui ro|Khẩu vị|Khau vi)[:\s]+(conservative|moderate|aggressive|thận trọng|can bang|cân bằng|mạo hiểm|mao hiem|than trong)",
         text,
         re.IGNORECASE,
     )
     if risk_match:
-        risk_map = {"thận trọng": "conservative", "cân bằng": "moderate", "mạo hiểm": "aggressive"}
+        risk_map = {
+            "thận trọng": "conservative",
+            "than trong": "conservative",
+            "cân bằng": "moderate",
+            "can bang": "moderate",
+            "mạo hiểm": "aggressive",
+            "mao hiem": "aggressive",
+        }
         raw_risk = risk_match.group(1).strip().lower()
         profile["risk_profile"] = risk_map.get(raw_risk, raw_risk)
 
     # Investment goals
-    goals_match = re.search(r"(?:Mục tiêu|Goals?|Objective)[:\s]+([^\n]+)", text, re.IGNORECASE)
+    goals_match = re.search(r"(?:Mục tiêu|Muc tieu|Goals?|Objective)[:\s]+([^\n]+)", text, re.IGNORECASE)
     if goals_match:
         profile["investment_goals"] = goals_match.group(1).strip()
 

@@ -36,7 +36,7 @@ def gatekeeper_check(state: AdvisoryState) -> dict:
         detail["aml_check"] = "FAILED"
         return {
             "compliance_status": ComplianceStatus.FAILED,
-            "compliance_reason": f"HALT: CCCD {client_id} nam trong danh sach den AML. Khong duoc phep tiep tuc.",
+            "compliance_reason": f"HALT: CCCD {client_id} nằm trong danh sách đen AML. Không được phép tiếp tục.",
             "compliance_detail": detail,
         }
 
@@ -44,7 +44,7 @@ def gatekeeper_check(state: AdvisoryState) -> dict:
         detail["aml_check"] = "FAILED"
         return {
             "compliance_status": ComplianceStatus.FAILED,
-            "compliance_reason": f"HALT: Ten khach hang bi danh dau trong he thong AML screening.",
+            "compliance_reason": "HALT: Tên khách hàng bị đánh dấu trong hệ thống AML screening.",
             "compliance_detail": detail,
         }
 
@@ -58,9 +58,9 @@ def gatekeeper_check(state: AdvisoryState) -> dict:
             return {
                 "compliance_status": ComplianceStatus.WARNING,
                 "compliance_reason": (
-                    f"CANH BAO: Khach hang co no xau nhom {bad_debt['group']}. "
-                    f"Ly do: {bad_debt['reason']}. "
-                    f"Can Enhanced Due Diligence. RM can xac nhan de tiep tuc."
+                    f"CẢNH BÁO: Khách hàng có nợ xấu nhóm {bad_debt['group']}. "
+                    f"Lý do: {bad_debt['reason']}. "
+                    "Cần Enhanced Due Diligence. RM cần xác nhận để tiếp tục."
                 ),
                 "compliance_detail": detail,
             }
@@ -68,8 +68,8 @@ def gatekeeper_check(state: AdvisoryState) -> dict:
             return {
                 "compliance_status": ComplianceStatus.WARNING,
                 "compliance_reason": (
-                    f"CANH BAO: Khach hang co lich su no nhom {bad_debt['group']}. "
-                    f"Ly do: {bad_debt['reason']}. RM can luu y."
+                    f"CẢNH BÁO: Khách hàng có lịch sử nợ nhóm {bad_debt['group']}. "
+                    f"Lý do: {bad_debt['reason']}. RM cần lưu ý."
                 ),
                 "compliance_detail": detail,
             }
@@ -81,8 +81,8 @@ def gatekeeper_check(state: AdvisoryState) -> dict:
             return {
                 "compliance_status": ComplianceStatus.WARNING,
                 "compliance_reason": (
-                    f"CANH BAO: Khach hang la Politically Exposed Person (PEP). "
-                    f"{pep.get('note', '')}. RM can xac nhan."
+                    "CẢNH BÁO: Khách hàng là Politically Exposed Person (PEP). "
+                    f"{pep.get('note', '')}. RM cần xác nhận."
                 ),
                 "compliance_detail": detail,
             }
@@ -91,12 +91,12 @@ def gatekeeper_check(state: AdvisoryState) -> dict:
     if not client_name:
         return {
             "compliance_status": ComplianceStatus.FAILED,
-            "compliance_reason": "Thieu ten khach hang - khong the thuc hien kiem tra AML/KYC.",
+            "compliance_reason": "Thiếu tên khách hàng - không thể thực hiện kiểm tra AML/KYC.",
             "compliance_detail": detail,
         }
 
     return {
         "compliance_status": ComplianceStatus.PASSED,
-        "compliance_reason": "Khach hang PASSED tat ca kiem tra AML/KYC, CIC, PEP.",
+        "compliance_reason": "Khách hàng PASSED tất cả kiểm tra AML/KYC, CIC, PEP.",
         "compliance_detail": detail,
     }

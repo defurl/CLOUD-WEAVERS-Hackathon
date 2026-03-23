@@ -46,9 +46,9 @@ def _extract_district(address: str) -> str:
         return "1"  # Default Q1
 
     patterns = [
-        r"(?:Quan|Q\.?)\s*(\d+|[A-Za-z\u00C0-\u1EF9\s]+?)(?:,|\s*$)",
+        r"(?:Quận|Quan|Q\.?)\s*(\d+|[A-Za-z\u00C0-\u1EF9\s]+?)(?:,|\s*$)",
         r"(?:District)\s*(\d+)",
-        r"(?:Huyen|H\.)\s+([A-Za-z\u00C0-\u1EF9\s]+?)(?:,|\s*$)",
+        r"(?:Huyện|Huyen|H\.)\s+([A-Za-z\u00C0-\u1EF9\s]+?)(?:,|\s*$)",
     ]
     for pattern in patterns:
         match = re.search(pattern, address, re.IGNORECASE)

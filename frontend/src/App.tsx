@@ -13,8 +13,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 type Step = "form" | "confirm_profile" | "review_agents" | "review_report" | "completed" | "rejected";
+type Lang = "en" | "vi";
 
 function App() {
+  const [lang, setLang] = useState<Lang>("vi");
   const [step, setStep] = useState<Step>("form");
   const [sessionId, setSessionId] = useState("");
   const [interruptData, setInterruptData] = useState<Record<string, unknown> | null>(null);
@@ -42,11 +44,11 @@ function App() {
       } else {
         setStep("rejected");
         setError(
-          (res.state.compliance_reason as string) || "Client did not pass AML/KYC screening"
+          (res.state.compliance_reason as string) || (lang === "vi" ? "Khách hàng không vượt qua kiểm tra AML/KYC" : "Client did not pass AML/KYC screening")
         );
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Server connection error");
+      setError(e instanceof Error ? e.message : (lang === "vi" ? "Lỗi kết nối máy chủ" : "Server connection error"));
     } finally {
       setLoading(false);
     }
@@ -60,7 +62,7 @@ function App() {
 
       if (!approved) {
         setStep("rejected");
-        setError("RM has rejected the client profile");
+        setError(lang === "vi" ? "RM đã từ chối hồ sơ khách hàng" : "RM has rejected the client profile");
         return;
       }
 
@@ -82,7 +84,7 @@ function App() {
         setStep("completed");
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Server connection error");
+      setError(e instanceof Error ? e.message : (lang === "vi" ? "Lỗi kết nối máy chủ" : "Server connection error"));
     } finally {
       setLoading(false);
     }
@@ -96,7 +98,7 @@ function App() {
 
       if (!approved) {
         setStep("rejected");
-        setError("RM flagged issues with agent data");
+        setError(lang === "vi" ? "RM đã đánh dấu vấn đề trong dữ liệu tác tử" : "RM flagged issues with agent data");
         return;
       }
 
@@ -111,7 +113,7 @@ function App() {
         setStep("completed");
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Server connection error");
+      setError(e instanceof Error ? e.message : (lang === "vi" ? "Lỗi kết nối máy chủ" : "Server connection error"));
     } finally {
       setLoading(false);
     }
@@ -129,10 +131,10 @@ function App() {
         setStep("completed");
       } else {
         setStep("rejected");
-        setError("RM requested report revision");
+        setError(lang === "vi" ? "RM yêu cầu chỉnh sửa báo cáo" : "RM requested report revision");
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Server connection error");
+      setError(e instanceof Error ? e.message : (lang === "vi" ? "Lỗi kết nối máy chủ" : "Server connection error"));
     } finally {
       setLoading(false);
     }
@@ -152,13 +154,37 @@ function App() {
     <div className="min-h-screen bg-zinc-50">
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight">Viet-Advisory Orchestrator</h1>
-          <p className="text-sm text-muted-foreground mt-1">AI Co-Pilot for Relationship Managers</p>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">Viet-Advisory Orchestrator</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                {lang === "vi" ? "Trợ lý AI cho Chuyên viên Quan hệ Khách hàng" : "AI Co-Pilot for Relationship Managers"}
+              </p>
+            </div>
+            <div className="inline-flex rounded-md border p-1 bg-white">
+              <Button
+                type="button"
+                size="sm"
+                variant={lang === "vi" ? "default" : "ghost"}
+                onClick={() => setLang("vi")}
+              >
+                VI
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={lang === "en" ? "default" : "ghost"}
+                onClick={() => setLang("en")}
+              >
+                EN
+              </Button>
+            </div>
+          </div>
           <Separator className="mt-4" />
         </div>
 
         {step !== "form" && (
-          <DAGStatus currentNode={currentNode} completedNodes={completedNodes} />
+          <DAGStatus currentNode={currentNode} completedNodes={completedNodes} lang={lang} />
         )}
 
         {error && (
@@ -166,19 +192,20 @@ function App() {
             <CardContent className="pt-6">
               <p className="text-destructive text-sm">{error}</p>
               <Button variant="outline" onClick={reset} className="mt-3" size="sm">
-                Start Over
+                {lang === "vi" ? "Bắt đầu lại" : "Start Over"}
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {step === "form" && <ClientForm onSubmit={handleStart} loading={loading} />}
+        {step === "form" && <ClientForm onSubmit={handleStart} loading={loading} lang={lang} />}
 
         {step === "confirm_profile" && interruptData && (
           <ProfileReview
             interruptData={interruptData}
             onDecision={handleProfileDecision}
             loading={loading}
+            lang={lang}
           />
         )}
 
@@ -187,6 +214,7 @@ function App() {
             interruptData={interruptData}
             onDecision={handleAgentsDecision}
             loading={loading}
+            lang={lang}
           />
         )}
 
@@ -195,13 +223,14 @@ function App() {
             interruptData={interruptData}
             onDecision={handleReportDecision}
             loading={loading}
+            lang={lang}
           />
         )}
 
         {step === "completed" && (
           <Card className="shadow-md">
             <CardHeader>
-              <CardTitle>Report Approved</CardTitle>
+              <CardTitle>{lang === "vi" ? "Báo cáo đã được phê duyệt" : "Report Approved"}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="rounded-lg border bg-muted/30 p-6 max-h-150 overflow-y-auto prose prose-sm max-w-none
@@ -212,7 +241,7 @@ function App() {
                 <Markdown remarkPlugins={[remarkGfm]}>{finalReport}</Markdown>
               </div>
               <Button variant="outline" onClick={reset} className="mt-4">
-                New Advisory Session
+                {lang === "vi" ? "Tạo phiên tư vấn mới" : "New Advisory Session"}
               </Button>
             </CardContent>
           </Card>
@@ -221,9 +250,9 @@ function App() {
         {step === "rejected" && !error && (
           <Card className="border-destructive shadow-sm">
             <CardContent className="pt-6">
-              <p className="text-sm">Advisory session has been cancelled.</p>
+              <p className="text-sm">{lang === "vi" ? "Phiên tư vấn đã bị hủy." : "Advisory session has been cancelled."}</p>
               <Button variant="outline" onClick={reset} className="mt-3" size="sm">
-                Start Over
+                {lang === "vi" ? "Bắt đầu lại" : "Start Over"}
               </Button>
             </CardContent>
           </Card>

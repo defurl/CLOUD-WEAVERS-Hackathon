@@ -21,13 +21,14 @@ def _generate_reasoning(risk_profile: str, bonds: list, stocks: list, macro: dic
     """Use LLM to explain why these instruments match the client's risk profile."""
     from utils.llm import generate
 
-    prompt = f"""Given a client with risk profile "{risk_profile}", the following market data, and macro indicators, provide a brief investment reasoning (3-5 sentences).
+    prompt = f"""Với khách hàng có khẩu vị rủi ro "{risk_profile}", dựa trên dữ liệu thị trường và chỉ số vĩ mô sau, hãy đưa ra phần giải thích đầu tư ngắn gọn (3-5 câu).
 
-Macro indicators: {json.dumps(macro, ensure_ascii=False)}
-Recommended bonds: {json.dumps(bonds, ensure_ascii=False)}
-Recommended stocks: {json.dumps(stocks, ensure_ascii=False)}
+Chỉ số vĩ mô: {json.dumps(macro, ensure_ascii=False)}
+Trái phiếu đề xuất: {json.dumps(bonds, ensure_ascii=False)}
+Cổ phiếu đề xuất: {json.dumps(stocks, ensure_ascii=False)}
 
-Explain WHY these specific bonds and stocks are suitable for this risk profile. Be specific about numbers and rates. Keep it concise."""
+Giải thích vì sao các mã trái phiếu và cổ phiếu này phù hợp. Nêu rõ số liệu/tỷ lệ quan trọng.
+Viết hoàn toàn bằng tiếng Việt có dấu. Nếu gặp từ tiếng Việt không dấu (ví dụ: tiet kiem), hãy tự chuẩn hóa thành có dấu (tiết kiệm)."""
 
     return generate(prompt, temperature=0.4, max_tokens=500)
 

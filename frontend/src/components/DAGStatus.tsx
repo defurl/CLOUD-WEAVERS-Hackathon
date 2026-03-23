@@ -1,15 +1,29 @@
 import { Badge } from "@/components/ui/badge";
 
-const NODES = [
-  { id: "smart_paste_parser", label: "Parse Input" },
-  { id: "pii_redactor", label: "PII Redaction" },
-  { id: "gatekeeper", label: "AML/KYC" },
-  { id: "rm_confirm_profile", label: "RM Review 1" },
-  { id: "parallel", label: "Data Agents" },
-  { id: "rm_review_agents", label: "RM Review 2" },
-  { id: "synthesizer", label: "Synthesis" },
-  { id: "rm_review_report", label: "RM Review 3" },
-];
+type Lang = "en" | "vi";
+
+const NODES: Record<Lang, Array<{ id: string; label: string }>> = {
+  en: [
+    { id: "smart_paste_parser", label: "Parse Input" },
+    { id: "pii_redactor", label: "PII Redaction" },
+    { id: "gatekeeper", label: "AML/KYC" },
+    { id: "rm_confirm_profile", label: "RM Review 1" },
+    { id: "parallel", label: "Data Agents" },
+    { id: "rm_review_agents", label: "RM Review 2" },
+    { id: "synthesizer", label: "Synthesis" },
+    { id: "rm_review_report", label: "RM Review 3" },
+  ],
+  vi: [
+    { id: "smart_paste_parser", label: "Phân tích đầu vào" },
+    { id: "pii_redactor", label: "Ẩn danh PII" },
+    { id: "gatekeeper", label: "AML/KYC" },
+    { id: "rm_confirm_profile", label: "RM duyệt 1" },
+    { id: "parallel", label: "Tác tử dữ liệu" },
+    { id: "rm_review_agents", label: "RM duyệt 2" },
+    { id: "synthesizer", label: "Tổng hợp" },
+    { id: "rm_review_report", label: "RM duyệt 3" },
+  ],
+};
 
 const PARALLEL_NODES = [
   "real_estate_agent",
@@ -21,9 +35,12 @@ const PARALLEL_NODES = [
 interface Props {
   currentNode: string;
   completedNodes: string[];
+  lang: Lang;
 }
 
-export default function DAGStatus({ currentNode, completedNodes }: Props) {
+export default function DAGStatus({ currentNode, completedNodes, lang }: Props) {
+  const nodes = NODES[lang];
+
   const getStatus = (nodeId: string) => {
     if (nodeId === "parallel") {
       const anyActive = PARALLEL_NODES.some((n) => n === currentNode);
@@ -45,7 +62,7 @@ export default function DAGStatus({ currentNode, completedNodes }: Props) {
 
   return (
     <div className="flex items-center gap-1.5 flex-wrap mb-6">
-      {NODES.map((node, i) => {
+      {nodes.map((node, i) => {
         const status = getStatus(node.id);
         return (
           <div key={node.id} className="flex items-center gap-1.5">
@@ -62,7 +79,7 @@ export default function DAGStatus({ currentNode, completedNodes }: Props) {
               {status === "completed" && <span className="mr-1">&#10003;</span>}
               {node.label}
             </Badge>
-            {i < NODES.length - 1 && (
+            {i < nodes.length - 1 && (
               <span className="text-muted-foreground text-xs">&#8594;</span>
             )}
           </div>
