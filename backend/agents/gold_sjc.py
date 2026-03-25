@@ -1,8 +1,3 @@
-"""
-Gold SJC Agent — Reads from data/gold.json.
-Returns current SJC prices + client gold holdings valuation.
-"""
-
 import json
 from pathlib import Path
 

@@ -1,8 +1,3 @@
-"""
-Gatekeeper Agent — AML/KYC compliance check.
-Reads from data/aml_blacklist.json for blacklist, bad debt, PEP checks.
-"""
-
 import json
 from pathlib import Path
 
@@ -31,7 +26,7 @@ def gatekeeper_check(state: AdvisoryState) -> dict:
         "bad_debt_info": None,
     }
 
-    # 1. AML blacklist check
+    # AML blacklist check
     if client_id in data.get("blacklisted_ids", []):
         detail["aml_check"] = "FAILED"
         return {
@@ -48,7 +43,7 @@ def gatekeeper_check(state: AdvisoryState) -> dict:
             "compliance_detail": detail,
         }
 
-    # 2. Bad debt check (CIC)
+    # Bad debt check (CIC)
     bad_debt = data.get("bad_debt_clients", {}).get(client_id)
     if bad_debt:
         detail["bad_debt_check"] = f"WARNING - Nhom {bad_debt['group']}"
@@ -74,7 +69,7 @@ def gatekeeper_check(state: AdvisoryState) -> dict:
                 "compliance_detail": detail,
             }
 
-    # 3. PEP check
+    # PEP check
     for pep in data.get("pep_list", []):
         if pep["name"].lower() == client_name:
             detail["pep_check"] = f"WARNING - {pep['role']}"
@@ -87,7 +82,7 @@ def gatekeeper_check(state: AdvisoryState) -> dict:
                 "compliance_detail": detail,
             }
 
-    # 4. Basic validation
+    # Basic validation
     if not client_name:
         return {
             "compliance_status": ComplianceStatus.FAILED,

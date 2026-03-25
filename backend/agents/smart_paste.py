@@ -1,11 +1,3 @@
-"""
-Smart Paste Parser — parses unstructured clipboard text from RM's legacy CRM
-into a structured ClientProfile.
-
-For prototype: uses regex-based extraction.
-Production: would use Claude to parse freeform text.
-"""
-
 import re
 from models.state import AdvisoryState, ClientProfile
 

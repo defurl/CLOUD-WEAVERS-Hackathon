@@ -21,7 +21,7 @@ const SCENARIOS: { label: string; badge: string; variant: "default" | "destructi
       investment_goals: "Tăng trưởng tài sản dài hạn, đa dạng hóa danh mục",
       monthly_income: "80000000", occupation: "Giám đốc doanh nghiệp",
       existing_loans: "0", property_area_sqm: "75",
-      property_type: "Nhà phố hẻm 3-6m", gold_holdings_tael: "5",
+      property_type: "Nha pho hem 3-6m", gold_holdings_tael: "5",
     },
   },
   {
@@ -34,7 +34,7 @@ const SCENARIOS: { label: string; badge: string; variant: "default" | "destructi
       risk_profile: "conservative", investment_goals: "Bảo toàn vốn",
       monthly_income: "25000000", occupation: "Nhân viên văn phòng",
       existing_loans: "1200000000", property_area_sqm: "50",
-      property_type: "Căn hộ chung cư", gold_holdings_tael: "0",
+      property_type: "Can ho chung cu", gold_holdings_tael: "0",
     },
   },
   {
@@ -60,7 +60,7 @@ const SCENARIOS: { label: string; badge: string; variant: "default" | "destructi
       risk_profile: "conservative", investment_goals: "Bảo toàn vốn, thu nhập cố định hàng tháng",
       monthly_income: "15000000", occupation: "Hưu trí",
       existing_loans: "0", property_area_sqm: "120",
-      property_type: "Nhà phố hẻm 6m+", gold_holdings_tael: "10",
+      property_type: "Nha pho hem 6m+", gold_holdings_tael: "10",
     },
   },
 ];

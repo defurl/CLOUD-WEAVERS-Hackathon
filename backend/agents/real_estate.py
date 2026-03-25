@@ -1,8 +1,3 @@
-"""
-Real Estate Agent — Property valuation from data/real_estate.json.
-Implements the "Alleyway Paradox" solution with district + alley width factors.
-"""
-
 import json
 from pathlib import Path
 

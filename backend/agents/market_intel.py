@@ -1,9 +1,3 @@
-"""
-Market Intelligence Agent — Reads from data/market.json.
-Returns bonds, stocks recommendations based on risk profile + macro data.
-Uses LLM to generate investment reasoning when available.
-"""
-
 import json
 from pathlib import Path
 

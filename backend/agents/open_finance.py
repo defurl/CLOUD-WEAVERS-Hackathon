@@ -1,8 +1,3 @@
-"""
-Open Finance Agent — Reads from data/open_finance.json.
-Simulates Brankas API fetching external account balances (Circular 64/2024).
-"""
-
 import json
 from pathlib import Path
 

@@ -19,6 +19,7 @@ from langgraph.types import Command
 from pydantic import BaseModel
 
 from graph import advisory_graph
+import uvicorn
 
 _SCENARIOS_PATH = Path(__file__).parent / "data" / "scenarios.json"
 
@@ -179,5 +180,4 @@ async def get_session_state(session_id: str):
 
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

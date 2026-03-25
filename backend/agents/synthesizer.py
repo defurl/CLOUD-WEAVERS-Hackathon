@@ -1,12 +1,11 @@
 """
 Synthesis Node — Aggregates all agent outputs and generates
-a hyper-personalized advisory report.
+a hyper-personalized advisory report in Vietnamese.
 
 Includes Vietnamese PIT (Personal Income Tax) tier calculations.
 """
 
 import json
-import os
 
 from models.state import AdvisoryState
 
@@ -20,6 +19,8 @@ _PIT_TIERS = [
     (960_000_000, 0.30),
     (float("inf"), 0.35),
 ]
+
+_RISK_VN = {"conservative": "Thận trọng", "moderate": "Cân bằng", "aggressive": "Mạo hiểm"}
 
 
 def calculate_pit(annual_income_vnd: float) -> dict:
@@ -47,12 +48,17 @@ def calculate_pit(annual_income_vnd: float) -> dict:
     }
 
 
-def synthesizer_node(state: AdvisoryState) -> dict:
-    """Node: Synthesize all agent data into advisory report.
+def _format_vnd(amount: float) -> str:
+    """Format number as Vietnamese currency."""
+    if amount >= 1_000_000_000:
+        return f"{amount / 1_000_000_000:,.2f} tỷ VND"
+    if amount >= 1_000_000:
+        return f"{amount / 1_000_000:,.0f} triệu VND"
+    return f"{amount:,.0f} VND"
 
-    Calls Gemini to generate a personalized advisory report.
-    Falls back to template if no API key is configured.
-    """
+
+def synthesizer_node(state: AdvisoryState) -> dict:
+    """Node: Synthesize all agent data into a Vietnamese advisory report."""
     from utils.llm import generate
 
     redacted = state.get("redacted_profile", {})
@@ -61,174 +67,182 @@ def synthesizer_node(state: AdvisoryState) -> dict:
     gold = state.get("gold", {})
     open_finance = state.get("open_finance", {})
 
-    # Calculate total net worth
     casa = redacted.get("casa_balance", 0)
     property_value = real_estate.get("estimated_value_vnd", 0)
     gold_value = gold.get("gold_value_vnd", 0)
     external_balance = open_finance.get("total_external_balance", 0)
     total_net_worth = casa + property_value + gold_value + external_balance
 
-    # Tax calculation (mock annual income = 10% of net worth)
-    estimated_annual_income = total_net_worth * 0.10
+    monthly_income = redacted.get("monthly_income", 0)
+    estimated_annual_income = (monthly_income * 12) if monthly_income > 0 else (total_net_worth * 0.10)
     tax_calc = calculate_pit(estimated_annual_income)
 
-    # Try LLM-generated report first
-    prompt = _build_synthesis_prompt(redacted, real_estate, market_intel, gold, open_finance, tax_calc)
+    prompt = _build_synthesis_prompt(redacted, real_estate, market_intel, gold, open_finance, tax_calc, total_net_worth)
     llm_report = generate(
         prompt,
-        system="Bạn là chuyên gia tư vấn tài chính cao cấp tại một ngân hàng lớn ở Việt Nam. Hãy tạo báo cáo tư vấn đầu tư cá nhân hóa, chi tiết, dùng markdown với bảng, số liệu cụ thể và phân tích sâu. Báo cáo phải bao gồm: tổng quan tài sản ròng, định giá bất động sản, khuyến nghị đầu tư (trái phiếu, cổ phiếu, vàng), tác động PIT, bối cảnh vĩ mô và rủi ro. Độ dài mục tiêu 900-1200 từ. Luôn kết thúc trọn ý, câu hoàn chỉnh, đóng đầy đủ ngoặc/bảng/danh sách/tiêu đề markdown. Viết hoàn toàn bằng tiếng Việt có dấu; nếu gặp cụm tiếng Việt không dấu (ví dụ: tiet kiem), hãy tự chuẩn hóa thành tiếng Việt có dấu (tiết kiệm). Tất cả giá trị tiền tệ dùng VND.",
+        system=(
+            "Bạn là chuyên gia tư vấn tài chính cao cấp tại một ngân hàng lớn ở Việt Nam. "
+            "Hãy tạo báo cáo tư vấn đầu tư cá nhân hóa, chi tiết, dùng markdown với bảng và số liệu cụ thể. "
+            "Báo cáo phải bao gồm: tổng quan tài sản ròng, định giá bất động sản, khuyến nghị đầu tư "
+            "(trái phiếu, cổ phiếu, vàng), tác động thuế TNCN, bối cảnh vĩ mô và rủi ro. "
+            "Độ dài mục tiêu 900–1200 từ. Luôn kết thúc trọn ý, đóng đầy đủ bảng/danh sách/tiêu đề markdown. "
+            "Viết hoàn toàn bằng tiếng Việt có dấu. Tất cả giá trị tiền tệ dùng đơn vị VND."
+        ),
         temperature=0.5,
         max_tokens=8192,
     )
 
-    if llm_report:
-        report = llm_report
-    else:
-        report = _generate_template_report(
-            redacted, real_estate, market_intel, gold, open_finance, tax_calc, total_net_worth
-        )
+    report = llm_report if llm_report else _generate_template_report(
+        redacted, real_estate, market_intel, gold, open_finance, tax_calc, total_net_worth
+    )
 
-    return {
-        "advisory_report": report,
-        "tax_calculation": tax_calc,
-    }
+    return {"advisory_report": report, "tax_calculation": tax_calc}
 
 
-def _build_synthesis_prompt(redacted, real_estate, market_intel, gold, open_finance, tax_calc) -> str:
-    """Build the prompt for LLM synthesis."""
-    return f"""Based on the following aggregated data, generate a personalized investment advisory report for a Vietnamese bank client.
+def _build_synthesis_prompt(redacted, real_estate, market_intel, gold, open_finance, tax_calc, total_net_worth) -> str:
+    risk_vn = _RISK_VN.get(redacted.get("risk_profile", "moderate"), "Cân bằng")
+    return f"""Dựa trên dữ liệu tổng hợp dưới đây, hãy tạo báo cáo tư vấn đầu tư cá nhân hóa cho khách hàng ngân hàng Việt Nam.
 
-## Client Profile (anonymized)
-{json.dumps(redacted, ensure_ascii=False, indent=2)}
+## Hồ sơ khách hàng (đã ẩn danh)
+- Mã khách hàng: {redacted.get('client_id', 'N/A')}
+- Khẩu vị rủi ro: {risk_vn}
+- Khu vực: Quận {redacted.get('district', 'N/A')}
+- Số dư CASA: {_format_vnd(redacted.get('casa_balance', 0))}
+- Thu nhập hàng tháng: {_format_vnd(redacted.get('monthly_income', 0))}
+- Nghề nghiệp: {redacted.get('occupation', 'N/A')}
+- Khoản vay hiện tại: {_format_vnd(redacted.get('existing_loans', 0))}
+- Mục tiêu đầu tư: {redacted.get('investment_goals', 'N/A')}
 
-## Real Estate Valuation
+## Định giá bất động sản (Citics AVM)
 {json.dumps(real_estate, ensure_ascii=False, indent=2)}
 
-## Market Intelligence
+## Thông tin thị trường (FiinGroup/SSI)
 {json.dumps(market_intel, ensure_ascii=False, indent=2)}
 
-## Gold SJC Data
+## Vàng SJC
 {json.dumps(gold, ensure_ascii=False, indent=2)}
 
-## External Accounts (Open Finance)
+## Tài khoản bên ngoài (Open Finance)
 {json.dumps(open_finance, ensure_ascii=False, indent=2)}
 
-## Estimated PIT (Personal Income Tax)
-{json.dumps(tax_calc, ensure_ascii=False, indent=2)}
+## Thuế TNCN ước tính
+- Thu nhập năm ước tính: {_format_vnd(tax_calc.get('annual_income_vnd', 0))}
+- Thuế TNCN ước tính: {_format_vnd(tax_calc.get('total_tax_vnd', 0))}
+- Thuế suất hiệu quả: {tax_calc.get('effective_rate_pct', 0)}%
 
-Please provide:
-1. Net worth overview with asset allocation table
-2. Real estate valuation analysis
-3. Specific investment recommendations (bonds, stocks, gold) aligned with client's risk profile
-4. PIT tax considerations
-5. Macro environment analysis
-6. Key risks and mitigation strategies
+## Tổng tài sản ròng ước tính: {_format_vnd(total_net_worth)}
 
-Use professional tone, specific data points, and tailor recommendations to the client's risk appetite."""
+Hãy tạo báo cáo tư vấn đầu tư hoàn chỉnh bằng tiếng Việt bao gồm:
+1. Tổng quan tài sản ròng (bảng phân bổ có tỷ trọng %)
+2. Phân tích định giá bất động sản và xu hướng thị trường khu vực
+3. Khuyến nghị đầu tư cụ thể (trái phiếu, cổ phiếu, vàng) phù hợp khẩu vị "{risk_vn}"
+4. Lưu ý thuế TNCN và cơ hội tối ưu thuế
+5. Bối cảnh kinh tế vĩ mô và tác động đến danh mục
+6. Các rủi ro cần lưu ý và chiến lược phòng ngừa
 
-
-def _format_vnd(amount: float) -> str:
-    """Format number as Vietnamese currency."""
-    if amount >= 1_000_000_000:
-        return f"{amount / 1_000_000_000:,.1f}B VND"
-    if amount >= 1_000_000:
-        return f"{amount / 1_000_000:,.0f}M VND"
-    return f"{amount:,.0f} VND"
+Giọng văn chuyên nghiệp, số liệu cụ thể, phù hợp khẩu vị "{risk_vn}"."""
 
 
 def _generate_template_report(redacted, real_estate, market_intel, gold, open_finance, tax_calc, total_net_worth) -> str:
-    """Generate a template-based advisory report (fallback when no API key)."""
+    """Tạo báo cáo mẫu tiếng Việt (fallback khi không có API key)."""
     risk = redacted.get("risk_profile", "moderate")
-    risk_label = {"conservative": "Conservative", "moderate": "Moderate", "aggressive": "Aggressive"}.get(risk, risk)
+    risk_vn = _RISK_VN.get(risk, risk)
 
     bonds = market_intel.get("recommended_bonds", [])
     stocks = market_intel.get("recommended_stocks", [])
     macro = market_intel.get("macro_indicators", {})
+    reasoning = market_intel.get("investment_reasoning", "")
 
     bonds_section = "\n".join(
-        f"  - **{b['issuer']}**: Coupon {b['coupon_rate']}%, maturity {b['maturity']}, "
-        f"rating {b['credit_score']}, min investment {_format_vnd(b['min_investment_vnd'])}"
+        f"  - **{b['issuer']}**: Lãi suất {b['coupon_rate']}%/năm, đáo hạn {b['maturity']}, "
+        f"xếp hạng {b['credit_score']}, tối thiểu {_format_vnd(b['min_investment_vnd'])}"
         for b in bonds
-    )
+    ) or "  *(Không có đề xuất trái phiếu)*"
 
     stocks_section = "\n".join(
         f"  - **{s['ticker']}** ({s['name']}): P/E {s['pe_ratio']}, "
-        f"dividend {s['dividend_yield_pct']}%, sector {s['sector']}"
+        f"tỷ suất cổ tức {s['dividend_yield_pct']}%, ngành {s['sector']}"
         for s in stocks
-    )
+    ) or "  *(Không có đề xuất cổ phiếu)*"
 
-    external_accs = open_finance.get("external_accounts", [])
     accounts_section = "\n".join(
         f"  - {a['bank']} ({a['account_type']}): {_format_vnd(a['balance_vnd'])}"
-        for a in external_accs
-    )
+        for a in open_finance.get("external_accounts", [])
+    ) or "  *(Không tìm thấy tài khoản bên ngoài)*"
 
-    # Asset allocation
     casa = redacted.get("casa_balance", 0)
     prop_val = real_estate.get("estimated_value_vnd", 0)
     gold_val = gold.get("gold_value_vnd", 0)
     ext_bal = open_finance.get("total_external_balance", 0)
 
-    report = f"""# PERSONALIZED INVESTMENT ADVISORY REPORT
+    def pct(val):
+        return f"{val / total_net_worth * 100:.1f}%" if total_net_worth > 0 else "N/A"
 
-**Client ID:** {redacted.get('client_id', 'N/A')}
-**Risk Profile:** {risk_label}
-**District:** {redacted.get('district', 'N/A')}
+    reasoning_block = f"\n> **Phân tích AI:** {reasoning}\n" if reasoning else ""
+
+    return f"""# BÁO CÁO TƯ VẤN ĐẦU TƯ CÁ NHÂN
+
+**Mã khách hàng:** `{redacted.get('client_id', 'N/A')}`
+**Khẩu vị rủi ro:** {risk_vn}
+**Khu vực:** Quận {redacted.get('district', 'N/A')}
 
 ---
 
-## 1. NET WORTH OVERVIEW
+## 1. TỔNG QUAN TÀI SẢN RÒNG
 
-| Asset Class | Value | Weight |
+| Loại tài sản | Giá trị | Tỷ trọng |
 |---|---|---|
-| CASA Deposits | {_format_vnd(casa)} | {casa/total_net_worth*100:.1f}% |
-| Real Estate | {_format_vnd(prop_val)} | {prop_val/total_net_worth*100:.1f}% |
-| Gold SJC ({gold.get('gold_holdings_tael', 0)} tael) | {_format_vnd(gold_val)} | {gold_val/total_net_worth*100:.1f}% |
-| External Accounts | {_format_vnd(ext_bal)} | {ext_bal/total_net_worth*100:.1f}% |
-| **TOTAL** | **{_format_vnd(total_net_worth)}** | **100%** |
+| Tiền gửi CASA | {_format_vnd(casa)} | {pct(casa)} |
+| Bất động sản | {_format_vnd(prop_val)} | {pct(prop_val)} |
+| Vàng SJC ({gold.get('gold_holdings_tael', 0)} lượng) | {_format_vnd(gold_val)} | {pct(gold_val)} |
+| Tài khoản bên ngoài | {_format_vnd(ext_bal)} | {pct(ext_bal)} |
+| **TỔNG TÀI SẢN RÒNG** | **{_format_vnd(total_net_worth)}** | **100%** |
 
-## 2. REAL ESTATE VALUATION
+## 2. ĐỊNH GIÁ BẤT ĐỘNG SẢN
 
-- District: {real_estate.get('district', 'N/A')}
-- Type: {real_estate.get('property_type', 'N/A')}
-- Area: {real_estate.get('area_sqm', 0)} sqm
-- Alley Width: {real_estate.get('alley_width_m', 0)}m
-- **Estimated Value: {_format_vnd(prop_val)}**
-- Source: {real_estate.get('valuation_source', 'N/A')}
+- **Khu vực:** {real_estate.get('district_name', f"Quận {real_estate.get('district', 'N/A')}")}
+- **Loại hình:** {real_estate.get('property_type', 'N/A')}
+- **Diện tích:** {real_estate.get('area_sqm', 0)} m²  — **Độ rộng hẻm:** {real_estate.get('alley_width_m', 0)}m
+- **Đơn giá:** {_format_vnd(real_estate.get('price_per_sqm', 0))}/m²
+- **Giá trị ước tính: {_format_vnd(prop_val)}**
+- **Xu hướng:** {real_estate.get('trend', 'stable')} ({real_estate.get('trend_pct', 0):+.1f}%/năm)
+- **Nguồn:** {real_estate.get('valuation_source', 'Citics AVM (mô phỏng)')}
 
-## 3. INVESTMENT RECOMMENDATIONS
-
-### Corporate Bonds
+## 3. KHUYẾN NGHỊ ĐẦU TƯ
+{reasoning_block}
+### Trái phiếu doanh nghiệp
 {bonds_section}
 
-### Equities
+### Cổ phiếu
 {stocks_section}
 
-### Gold SJC
-- Buy Price: {_format_vnd(gold.get('sjc_buy_price', 0))}/tael
-- Sell Price: {_format_vnd(gold.get('sjc_sell_price', 0))}/tael
-- Current Holdings: {gold.get('gold_holdings_tael', 0)} tael = {_format_vnd(gold_val)}
+### Vàng SJC
+- **Giá mua vào:** {_format_vnd(gold.get('sjc_buy_price', 0))}/lượng
+- **Giá bán ra:** {_format_vnd(gold.get('sjc_sell_price', 0))}/lượng
+- **Nắm giữ hiện tại:** {gold.get('gold_holdings_tael', 0)} lượng = **{_format_vnd(gold_val)}**
+- **Xu hướng:** {gold.get('trend', 'N/A')}
 
-## 4. EXTERNAL ACCOUNTS (Open Finance)
+## 4. TÀI KHOẢN BÊN NGOÀI (Open Finance)
 {accounts_section}
-- **Total:** {_format_vnd(ext_bal)}
+- **Tổng:** {_format_vnd(ext_bal)}
 
-## 5. ESTIMATED PIT (Personal Income Tax)
+## 5. THUẾ THU NHẬP CÁ NHÂN (TNCN) ƯỚC TÍNH
 
-- Estimated Annual Income: {_format_vnd(tax_calc.get('annual_income_vnd', 0))}
-- Estimated PIT: {_format_vnd(tax_calc.get('total_tax_vnd', 0))}
-- Effective Tax Rate: {tax_calc.get('effective_rate_pct', 0)}%
+- **Thu nhập năm ước tính:** {_format_vnd(tax_calc.get('annual_income_vnd', 0))}
+- **Thuế TNCN ước tính:** {_format_vnd(tax_calc.get('total_tax_vnd', 0))}
+- **Thuế suất hiệu quả:** {tax_calc.get('effective_rate_pct', 0)}%
 
-## 6. MACRO INDICATORS
+## 6. CHỈ SỐ KINH TẾ VĨ MÔ
 
-- GDP Growth: {macro.get('gdp_growth_pct', 0)}%
-- Inflation: {macro.get('inflation_pct', 0)}%
-- SBV Interest Rate: {macro.get('sbv_interest_rate_pct', 0)}%
-- VN-Index: {macro.get('vnindex', 0):,}
-- USD/VND Rate: {macro.get('vnd_usd_rate', 0):,}
+| Chỉ số | Giá trị |
+|---|---|
+| Tăng trưởng GDP | {macro.get('gdp_growth_pct', 0)}% |
+| Lạm phát | {macro.get('inflation_pct', 0)}% |
+| Lãi suất NHNN | {macro.get('sbv_interest_rate_pct', 0)}% |
+| VN-Index | {macro.get('vnindex', 0):,} điểm |
+| Tỷ giá USD/VND | {macro.get('vnd_usd_rate', 0):,} |
 
 ---
-*Report generated by Viet-Advisory Orchestrator. This is a reference document, not official investment advice.
-All investment decisions must be reviewed and approved by the Relationship Manager.*
+*Báo cáo được tạo bởi Viet-Advisory Orchestrator. Đây là tài liệu tham khảo, không phải lời khuyên đầu tư chính thức.
+Mọi quyết định đầu tư cần được Chuyên viên QHKH xem xét và phê duyệt.*
 """
-    return report
