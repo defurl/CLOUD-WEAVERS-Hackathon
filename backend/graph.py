@@ -1,16 +1,3 @@
-"""
-Viet-Advisory Orchestrator — LangGraph DAG
-
-Flow:
-  START -> smart_paste_parser -> pii_redactor -> gatekeeper
-    -> [INTERRUPT: RM confirms profile + compliance results]
-    -> fan-out: real_estate | market_intel | gold_sjc | open_finance
-    -> [INTERRUPT: RM reviews agent results, can edit]
-    -> synthesizer
-    -> [INTERRUPT: RM reviews final report]
-    -> END
-"""
-
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.types import interrupt
@@ -26,7 +13,7 @@ from agents.synthesizer import synthesizer_node
 from utils.pii_redactor import redact_pii
 
 
-# --- Human-in-the-loop checkpoint nodes ---
+# Human-in-the-loop checkpoint nodes
 
 def rm_confirm_profile(state: AdvisoryState) -> dict:
     """Checkpoint 1: RM reviews profile + compliance + redacted data."""
@@ -93,12 +80,9 @@ def rm_review_report(state: AdvisoryState) -> dict:
         }
 
 
-# --- Routing ---
-
 def route_after_gatekeeper(state: AdvisoryState) -> str:
     if state.get("compliance_status") == ComplianceStatus.FAILED:
         return END
-    # PASSED or WARNING both go to RM review
     return "rm_confirm_profile"
 
 
@@ -111,8 +95,6 @@ def route_after_profile_confirm(state: AdvisoryState):
 def route_after_report_review(state: AdvisoryState) -> str:
     return END
 
-
-# --- Build the graph ---
 
 def build_graph():
     builder = StateGraph(AdvisoryState)
@@ -130,24 +112,19 @@ def build_graph():
     builder.add_node("synthesizer", synthesizer_node)
     builder.add_node("rm_review_report", rm_review_report)
 
-    # Sequential: START -> parse -> redact -> gatekeeper
     builder.add_edge(START, "smart_paste_parser")
     builder.add_edge("smart_paste_parser", "pii_redactor")
     builder.add_edge("pii_redactor", "gatekeeper")
 
-    # Gatekeeper -> FAIL=END, PASS/WARN=rm_confirm
     builder.add_conditional_edges("gatekeeper", route_after_gatekeeper)
 
-    # RM confirm -> fan-out or END
     builder.add_conditional_edges("rm_confirm_profile", route_after_profile_confirm)
 
-    # Fan-in: 4 agents -> rm_review_agents
     builder.add_edge("real_estate_agent", "rm_review_agents")
     builder.add_edge("market_intel_agent", "rm_review_agents")
     builder.add_edge("gold_sjc_agent", "rm_review_agents")
     builder.add_edge("open_finance_agent", "rm_review_agents")
 
-    # Agent review -> synthesizer -> report review -> END
     builder.add_edge("rm_review_agents", "synthesizer")
     builder.add_edge("synthesizer", "rm_review_report")
     builder.add_conditional_edges("rm_review_report", route_after_report_review)

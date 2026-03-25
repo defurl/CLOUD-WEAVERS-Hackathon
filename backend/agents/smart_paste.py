@@ -6,7 +6,6 @@ def parse_smart_paste(state: AdvisoryState) -> dict:
     """Node: Parse raw clipboard paste into structured client profile.
     If client_profile is already provided (from form input), skip parsing.
     """
-    # Skip if profile already provided via form
     existing = state.get("client_profile")
     if existing and existing.get("name"):
         return {}

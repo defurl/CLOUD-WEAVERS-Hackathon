@@ -1,13 +1,3 @@
-"""
-FastAPI server for the Viet-Advisory Orchestrator.
-
-Endpoints:
-  POST /api/advisory/start-form  — Start advisory from structured form
-  POST /api/advisory/approve     — RM approves/rejects at checkpoint
-  GET  /api/advisory/state/:id   — Get current session state
-  GET  /api/advisory/scenarios   — Get available demo scenarios
-"""
-
 import json
 import uuid
 from contextlib import asynccontextmanager
@@ -40,7 +30,7 @@ app.add_middleware(
 )
 
 
-# --- Request/Response models ---
+# Request/Response models
 
 class StartFormRequest(BaseModel):
     name: str
@@ -85,7 +75,7 @@ class StateResponse(BaseModel):
     completed: bool
 
 
-# --- Helpers ---
+# Helpers
 
 def _extract_interrupt(session_id: str) -> dict | None:
     config = {"configurable": {"thread_id": session_id}}
@@ -103,13 +93,11 @@ def _is_completed(session_id: str) -> bool:
     return len(graph_state.next) == 0
 
 
-# --- Endpoints ---
-
+# Endpoints
 @app.get("/api/advisory/scenarios")
 async def get_scenarios():
     with open(_SCENARIOS_PATH, encoding="utf-8") as f:
         return json.load(f)
-
 
 @app.post("/api/advisory/start-form", response_model=StartResponse)
 async def start_advisory_form(req: StartFormRequest):
@@ -132,7 +120,6 @@ async def start_advisory_form(req: StartFormRequest):
         interrupted=interrupt_data is not None,
         interrupt_data=interrupt_data,
     )
-
 
 @app.post("/api/advisory/approve", response_model=ApproveResponse)
 async def approve_checkpoint(req: ApproveRequest):

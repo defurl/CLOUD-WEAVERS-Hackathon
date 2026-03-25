@@ -1,12 +1,8 @@
-"""
-LLM utility — thin wrapper around Google Gemini.
-Falls back to None when GEMINI_API_KEY is not set (template mode).
-"""
-
 import os
 import logging
 
 from dotenv import load_dotenv
+from google.genai import types
 
 load_dotenv()
 
@@ -22,7 +18,6 @@ def _extract_text(response) -> str:
     if isinstance(text, str) and text.strip():
         return text
 
-    # Fallback for cases where response.text is empty but candidates/parts exist.
     chunks: list[str] = []
     for candidate in getattr(response, "candidates", []) or []:
         content = getattr(candidate, "content", None)
@@ -60,7 +55,6 @@ def generate(prompt: str, *, system: str = "", temperature: float = 0.7, max_tok
     if client is None:
         return None
     try:
-        from google.genai import types
 
         response = client.models.generate_content(
             model=_MODEL,
@@ -75,7 +69,6 @@ def generate(prompt: str, *, system: str = "", temperature: float = 0.7, max_tok
         if not text:
             return None
 
-        # If the model stopped due to token limits, fetch one continuation chunk.
         reason = _finish_reason(response)
         if "MAX_TOKENS" in reason:
             continuation_prompt = (

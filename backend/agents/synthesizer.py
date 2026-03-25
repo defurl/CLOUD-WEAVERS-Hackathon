@@ -1,15 +1,7 @@
-"""
-Synthesis Node — Aggregates all agent outputs and generates
-a hyper-personalized advisory report in Vietnamese.
-
-Includes Vietnamese PIT (Personal Income Tax) tier calculations.
-"""
-
 import json
 
 from models.state import AdvisoryState
 
-# Vietnam PIT tiers (annual income in VND)
 _PIT_TIERS = [
     (60_000_000, 0.05),
     (120_000_000, 0.10),

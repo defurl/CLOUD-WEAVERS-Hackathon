@@ -187,7 +187,6 @@ export default function ProfileReview({ interruptData, onDecision, loading, lang
 
         <Separator />
 
-        {/* PII Redaction: Before / After */}
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
             {t.beforeAfter}

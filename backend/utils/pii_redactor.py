@@ -1,8 +1,3 @@
-"""
-PII Redaction Module — strips PII locally before sending to cloud LLM.
-Extracts geospatial attributes while removing exact addresses and names.
-"""
-
 import hashlib
 import re
 
@@ -43,7 +38,7 @@ def _build_redacted_profile(profile: ClientProfile) -> RedactedProfile:
 
 def _extract_district(address: str) -> str:
     if not address:
-        return "1"  # Default Q1
+        return "1" 
 
     patterns = [
         r"(?:Quận|Quan|Q\.?)\s*(\d+|[A-Za-z\u00C0-\u1EF9\s]+?)(?:,|\s*$)",

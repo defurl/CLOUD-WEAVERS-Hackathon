@@ -1,34 +1,3 @@
-"""
-LangGraph State Schema for Viet-Advisory Orchestrator.
-
-DAG Flow:
-  smart_paste_parser
-        |
-        v
-    pii_redactor
-        |
-        v
-    gatekeeper (AML/KYC) --fail--> END (rejected)
-        | pass
-        v
-  [HUMAN CHECKPOINT 1: RM confirms client profile]
-        | approved
-        v
-  +-----+----------+--------------+
-  v     v          v              v
-real  market    gold_sjc    open_finance
-estate intel
-  +-----+----------+--------------+
-        v
-    synthesizer (Claude)
-        |
-        v
-  [HUMAN CHECKPOINT 2: RM reviews report]
-        | approved
-        v
-      END (report delivered)
-"""
-
 from __future__ import annotations
 
 import operator
@@ -118,31 +87,31 @@ class ComplianceDetail(TypedDict, total=False):
 
 
 class AdvisoryState(TypedDict, total=False):
-    # --- Input ---
+    # Input
     raw_paste: str
 
-    # --- Parsed & Privacy ---
+    # Parsed & Privacy
     client_profile: ClientProfile
     redacted_profile: RedactedProfile
 
-    # --- Compliance ---
+    # Compliance
     compliance_status: ComplianceStatus
     compliance_reason: str
     compliance_detail: ComplianceDetail
 
-    # --- Human-in-the-loop ---
+    # Human-in-the-loop
     rm_approved_profile: bool
     rm_approved_report: bool
 
-    # --- Agent outputs (populated in parallel) ---
+    # Agent outputs
     real_estate: RealEstateData
     market_intel: MarketIntelData
     gold: GoldData
     open_finance: OpenFinanceData
 
-    # --- Synthesis ---
+    # Synthesis
     advisory_report: str
     tax_calculation: dict[str, Any]
 
-    # --- Metadata ---
+    # Metadata
     errors: Annotated[list[str], operator.add]
